@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>YouTube Downloader</title>
+  <meta name="description" content="Ein kostenloser YouTube Downloader powered by yt-dlp. Lade Videos direkt von YouTube herunter – einfach und schnell.">
+  <meta name="robots" content="index, follow">
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: radial-gradient(circle at top, #1a1a1a, #000);
+      color: #fff;
+      text-align: center;
+      padding: 80px 20px;
+    }
+    h1 {
+      font-size: 2.5em;
+      margin-bottom: 30px;
+    }
+    input {
+      width: 70%;
+      max-width: 500px;
+      padding: 12px;
+      border: none;
+      border-radius: 10px;
+      outline: none;
+      margin-bottom: 15px;
+    }
+    button {
+      padding: 10px 25px;
+      border: none;
+      border-radius: 10px;
+      background: #ff003c;
+      color: #fff;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    button:hover {
+      background: #ff335c;
+      transform: scale(1.05);
+    }
+    #status { margin-top: 20px; color: #aaa; }
+  </style>
+</head>
+<body>
+  <h1>🎧 YouTube Downloader</h1>
+  <input type="text" id="url" placeholder="YouTube-Link hier einfügen">
+  <br>
+  <button onclick="download()">Herunterladen</button>
+  <p id="status"></p>
+
+  <script>
+    async function download() {
+      const url = document.getElementById("url").value.trim();
+      const status = document.getElementById("status");
+
+      if (!url) {
+        status.textContent = "⚠️ Bitte gib einen gültigen Link ein.";
+        return;
+      }
+
+      status.textContent = "⏳ Lade herunter ...";
+
+      try {
+        const response = await fetch("/download", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ url })
+        });
+
+        if (!response.ok) {
+          const err = await response.json();
+          throw new Error(err.error || "Unbekannter Fehler");
+        }
+
+        const blob = await response.blob();
+        const a = document.createElement("a");
+        a.href = URL.createObjectURL(blob);
+        a.download = "video.mp4";
+        a.click();
+
+        status.textContent = "✅ Download abgeschlossen!";
+      } catch (e) {
+        status.textContent = "❌ Fehler: " + e.message;
+      }
+    }
+  </script>
+</body>
+</html>
